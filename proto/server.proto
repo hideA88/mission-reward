@@ -1,0 +1,79 @@
+syntax = "proto3";
+package mission_reward;
+option go_package = "pkg/grpc";
+
+import "google/protobuf/timestamp.proto";
+
+
+service MissionRewardCommandService {
+  rpc PostLoginEvent(PostLoginEventRequest) returns (PostLoginEventResponse);
+  rpc PostKillMonsterEvent(PostKillMonsterEventRequest) returns (PostKillMonsterEventResponse);
+  rpc PostLevelUpEvent(PostLevelUpEventRequest) returns (PostLevelUpEventResponse);
+}
+
+service MissionRewardQueryService {
+  rpc UserStatus (UserStatusRequest) returns (UserStatusResponse);
+}
+
+message PostLoginEventRequest {
+  int64 userId = 1;
+  google.protobuf.Timestamp eventAt = 2;
+}
+
+message PostLoginEventResponse {
+  int64 loginEventId = 1;
+  google.protobuf.Timestamp eventAt = 2;
+}
+
+message PostKillMonsterEventRequest {
+  int64 userId = 1;
+  int64 userMonsterId = 2;
+  int64 targetMonsterId = 3;
+  google.protobuf.Timestamp eventAt = 4;
+}
+
+message PostKillMonsterEventResponse {
+  int64 killMonsterEventId = 1;
+}
+
+message PostLevelUpEventRequest {
+  int64 userId = 1;
+  int64 userMonsterId = 2;
+  int32 levelUpSize = 3;
+  google.protobuf.Timestamp eventAt = 4;
+}
+
+message PostLevelUpEventResponse {
+  int64 levelUpEventId = 1;
+}
+
+message UserStatusRequest {
+  int64 userId = 1;
+  google.protobuf.Timestamp lastRequested = 2;
+}
+
+message UserStatusResponse {
+  int64 userId = 1;
+  int32 coin = 2;
+  repeated Item items = 3;
+  repeated Monster monsters = 4;
+  repeated Reward rewards = 5;
+  google.protobuf.Timestamp lastLoginDateTime = 6;
+}
+
+message Item {
+  int64 itemId = 1;
+  string name = 2;
+  int32 size = 3;
+}
+
+message Monster {
+  int64 monsterId = 1;
+  string name = 2;
+  int32 level = 3;
+}
+
+message Reward {
+  int64 rewardId = 1;
+  string name = 2;
+}
