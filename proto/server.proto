@@ -54,11 +54,12 @@ message UserStatusRequest {
 
 message UserStatusResponse {
   int64 userId = 1;
-  int32 coin = 2;
-  repeated Item items = 3;
-  repeated Monster monsters = 4;
-  repeated Reward rewards = 5;
-  google.protobuf.Timestamp lastLoginDateTime = 6;
+  string name = 2;
+  int32 coin = 3;
+  repeated Item items = 4;
+  repeated Monster monsters = 5;
+  repeated Achieve achieves = 6;
+  google.protobuf.Timestamp lastLoginAt = 7;
 }
 
 message Item {
@@ -73,7 +74,8 @@ message Monster {
   int32 level = 3;
 }
 
-message Reward {
-  int64 rewardId = 1;
+message Achieve {
+  int64 achieveId = 1;
   string name = 2;
+  google.protobuf.Timestamp achieved_at = 3;
 }
