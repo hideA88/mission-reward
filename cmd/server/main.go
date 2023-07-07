@@ -8,6 +8,8 @@ import (
 	crepo "github.com/hideA88/mission-reward/pkg/command/repository"
 	cserv "github.com/hideA88/mission-reward/pkg/command/service"
 	pb "github.com/hideA88/mission-reward/pkg/grpc"
+	qrepo "github.com/hideA88/mission-reward/pkg/query/repository"
+	qserv "github.com/hideA88/mission-reward/pkg/query/service"
 	"github.com/jmoiron/sqlx"
 	"google.golang.org/grpc"
 	"net"
@@ -72,6 +74,10 @@ func main() {
 	// wire command
 	er := crepo.NewEventRepository(db, logger)
 	pb.RegisterMissionRewardCommandServiceServer(gsrv, cserv.NewMissionRewardCommand(er, lgCh, kmCh, luCh, logger))
+
+	// wire query
+	qur := qrepo.NewUserRepository(db, logger)
+	pb.RegisterMissionRewardQueryServiceServer(gsrv, qserv.NewMissionRewardQuery(qur, logger))
 
 	go func() {
 		logger.Infof("start gRPC service port: %v", port)
