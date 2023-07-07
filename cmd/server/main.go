@@ -7,6 +7,9 @@ import (
 	"github.com/hideA88/mission-reward/cmd"
 	crepo "github.com/hideA88/mission-reward/pkg/command/repository"
 	cserv "github.com/hideA88/mission-reward/pkg/command/service"
+	"github.com/hideA88/mission-reward/pkg/consumer/model/message"
+	"github.com/hideA88/mission-reward/pkg/consumer/repository"
+	"github.com/hideA88/mission-reward/pkg/consumer/service/checker"
 	pb "github.com/hideA88/mission-reward/pkg/grpc"
 	qrepo "github.com/hideA88/mission-reward/pkg/query/repository"
 	qserv "github.com/hideA88/mission-reward/pkg/query/service"
@@ -78,6 +81,27 @@ func main() {
 	// wire query
 	qur := qrepo.NewUserRepository(db, logger)
 	pb.RegisterMissionRewardQueryServiceServer(gsrv, qserv.NewMissionRewardQuery(qur, logger))
+
+	// wire consumer
+	mr := repository.NewMissionRepository(db, logger)
+	rr := repository.NewMissionRewardRepository(db, logger)
+	ur := repository.NewUserRepository(db, logger)
+
+	mc := checker.NewCommonMission(mr, rr, ur, gcCh, giCh, omCh, logger)
+	tc := checker.NewTotalCoin(mc)
+	gc := checker.NewGetItem(mc)
+	oc := checker.NewOpenMission(mc, lgCh, kmCh, luCh)
+
+	lm := checker.NewLoginMission(mc)
+	lu := checker.NewLevelUpMission(mc)
+	km := checker.NewKillMonsterMission(mc)
+
+	go lm.Serve(ctx, lgCh)
+	go lu.Serve(ctx, luCh)
+	go km.Serve(ctx, kmCh)
+	go tc.Serve(ctx, gcCh)
+	go gc.Serve(ctx, giCh)
+	go oc.Serve(ctx, omCh)
 
 	go func() {
 		logger.Infof("start gRPC service port: %v", port)
