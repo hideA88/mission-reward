@@ -1,6 +1,20 @@
 version: "3.8"
 
 services:
+  server:
+    image: cosmtrek/air:latest
+    container_name: server
+    ports:
+     - "8080:8080"
+    volumes:
+      - ./:/go/src/mission-reward
+    working_dir: /go/src/mission-reward
+    environment:
+      db.address: db
+      DB_ADDRESS: db
+    depends_on:
+      - db
+
   db:
     image: mysql:8.0
     container_name: db
@@ -14,4 +28,4 @@ services:
       - ./docker/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./docker/data/mysql:/var/lib/mysql
     ports:
-      - 3306:3306
+      - "3306:3306"
