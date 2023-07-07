@@ -1,5 +1,9 @@
 package cmd
 
+import (
+	"github.com/spf13/viper"
+)
+
 type Config struct {
 	Verbose bool
 	DB      *db
@@ -22,19 +26,26 @@ type server struct {
 
 // ParseConfig TODO implement read config file
 func ParseConfig() (*Config, error) {
-	db := &db{
-		Driver:   "mysql",
-		User:     "user",
-		Password: "password",
-		Database: "mission_reward",
-		Address:  "localhost",
+	viper.SetConfigFile("./configs/config.toml")
+	viper.AutomaticEnv()
 
-		Port: 3306,
+	err := viper.ReadInConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	db := &db{
+		Driver:   viper.GetString("db_driver"),
+		User:     viper.GetString("db_user"),
+		Password: viper.GetString("db_password"),
+		Database: viper.GetString("db_database"),
+		Address:  viper.GetString("db_address"),
+		Port:     viper.GetInt("db_port"),
 	}
 
 	server := &server{
-		Address: "localhost",
-		Port:    8080,
+		Address: viper.GetString("server_address"),
+		Port:    viper.GetInt("server_port"),
 	}
 
 	config := &Config{

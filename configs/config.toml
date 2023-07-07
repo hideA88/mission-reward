@@ -1,0 +1,11 @@
+Verbose = true
+
+server_address = 'localhost'
+server_port = 8080
+
+db_driver =   "mysql"
+db_user =     "user"
+db_password = "password"
+db_database = "mission_reward"
+db_address  = "localhost"
+db_port = 3306
