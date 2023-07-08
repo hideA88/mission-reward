@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/hideA88/mission-reward/pkg/grpc"
 	"github.com/hideA88/mission-reward/pkg/query/repository"
 	"go.uber.org/zap"
@@ -41,6 +42,11 @@ func (qs *MissionRewardQueryServer) UserStatus(ctx context.Context, req *pb.User
 		as[i] = &pb.Achieve{AchieveId: it.AchieveId, Name: it.Name, AchievedAt: timestamppb.New(*it.AchievedAt)}
 	}
 
+	var lla *timestamp.Timestamp = nil
+	if ufd.LastLoginAt != nil {
+		lla = timestamppb.New(*ufd.LastLoginAt)
+	}
+
 	return &pb.UserStatusResponse{
 		UserId:      ufd.Id,
 		Name:        ufd.Name,
@@ -48,6 +54,6 @@ func (qs *MissionRewardQueryServer) UserStatus(ctx context.Context, req *pb.User
 		Items:       items,
 		Monsters:    ms,
 		Achieves:    as,
-		LastLoginAt: timestamppb.New(*ufd.LastLoginAt),
+		LastLoginAt: lla,
 	}, nil
 }
