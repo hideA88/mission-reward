@@ -5,16 +5,14 @@ services:
     image: cosmtrek/air:latest
     container_name: server
     ports:
-     - "8080:8080"
+      - "8080:8080"
     volumes:
       - ./:/go/src/mission-reward
     working_dir: /go/src/mission-reward
     environment:
-      db.address: db
       DB_ADDRESS: db
     depends_on:
       - db
-
   db:
     image: mysql:8.0
     container_name: db
