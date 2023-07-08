@@ -10,7 +10,9 @@ Docker 24.0.2
 ### 初期セットアップ方法
 
 ```
-make setup
+make tools
+docker compose up -d db
+make migrate-up
 ```
 
 ### 検証方法
@@ -21,8 +23,6 @@ make setup
 
 ```
 docker-compose up -d
-make migrate-up
-make run-server
 ```
 
 #### クライアントの起動
