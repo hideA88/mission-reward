@@ -11,7 +11,8 @@ BUILD=local
 LDFLAGS = -ldflags "-X $(PKGNAME)/pkg/version.gitCommit=$(GIT_COMMIT) \
 										-X $(PKGNAME)/pkg/version.version=$(VERSION)\
 										-X $(PKGNAME)/pkg/version.build=$(BUILD)"
-GOOSE_OPTION = -dir ./db/migrate mysql "user:password@/mission_reward?parseTime=true&loc=Asia%2FTokyo"
+DB_ADDRESS := localhost
+GOOSE_OPTION = -dir ./db/migrate mysql "user:password@tcp(${DB_ADDRESS}:3306)/mission_reward?parseTime=true&loc=Asia%2FTokyo"
 
 # command
 defualt: tools help
@@ -38,7 +39,7 @@ tools:
 	go install github.com/pressly/goose/v3/cmd/goose@latest &&\
 	go install github.com/cosmtrek/air@latest &&\
 	go install github.com/go-delve/delve/cmd/dlv@latest &&\
-	go install google.golang.org/protobuf/cmd/protoc-gen-go &&\
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
 
 
 
@@ -90,7 +91,7 @@ migrate-%:
 
 ## ssh service container
 ssh-server:
-	docker compose exec server /bin/bash
+	docker compose exec migrate /bin/bash
 
 ## Show help
 help:
