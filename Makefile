@@ -91,7 +91,7 @@ migrate-%:
 
 ## ssh service container
 ssh-server:
-	docker compose exec migrate /bin/bash
+	docker compose exec server /bin/bash
 
 ## Show help
 help:
