@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/hideA88/mission-reward/pkg/grpc"
 	"github.com/hideA88/mission-reward/pkg/query/repository"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -23,8 +26,11 @@ func (qs *MissionRewardQueryServer) UserStatus(ctx context.Context, req *pb.User
 	lastReqTime := req.LastRequested.AsTime()
 	ufd, err := qs.userRepository.GetFullData(req.UserId, &lastReqTime)
 	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, status.Errorf(codes.NotFound, fmt.Sprintf("not found user data. userId: %d", req.UserId))
+		}
 		qs.logger.Error(err)
-		return nil, err
+		return nil, status.Errorf(codes.Internal, fmt.Sprintf("internal error."))
 	}
 
 	items := make([]*pb.Item, len(ufd.Items))
