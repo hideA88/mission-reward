@@ -5,9 +5,14 @@ import (
 )
 
 type Config struct {
-	Verbose bool
+	General *general
 	DB      *db
 	Server  *server
+	Test    *test_
+}
+
+type general struct {
+	Verbose bool
 }
 
 type db struct {
@@ -24,32 +29,63 @@ type server struct {
 	Port    int
 }
 
-// ParseConfig TODO implement read config file
-func ParseConfig() (*Config, error) {
-	viper.SetConfigFile("./configs/config.toml")
+type test_ struct {
+	DbPort int
+}
+
+func ParseConfig(filePath string) (*Config, error) {
+	err := readInit(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return readConf()
+}
+
+func ParseTestConfig(filePath string) (*Config, error) {
+	err := readInit(filePath)
+	if err != nil {
+		return nil, err
+	}
+	conf, err := readConf()
+	if err != nil {
+		return nil, err
+	}
+	conf.DB.Port = viper.GetInt("test.db_port")
+	return conf, nil
+}
+
+func readInit(filePath string) error {
+	viper.SetConfigFile(filePath)
 	viper.AutomaticEnv()
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		return nil, err
+		return err
+	}
+	return nil
+}
+
+func readConf() (*Config, error) {
+	general := &general{
+		Verbose: viper.GetBool("general.verbose"),
 	}
 
 	db := &db{
-		Driver:   viper.GetString("db_driver"),
-		User:     viper.GetString("db_user"),
-		Password: viper.GetString("db_password"),
-		Database: viper.GetString("db_database"),
-		Address:  viper.GetString("db_address"),
-		Port:     viper.GetInt("db_port"),
+		Driver:   viper.GetString("db.driver"),
+		User:     viper.GetString("db.user"),
+		Password: viper.GetString("db.password"),
+		Database: viper.GetString("db.database"),
+		Address:  viper.GetString("db.address"),
+		Port:     viper.GetInt("db.port"),
 	}
 
 	server := &server{
-		Address: viper.GetString("server_address"),
-		Port:    viper.GetInt("server_port"),
+		Address: viper.GetString("server.address"),
+		Port:    viper.GetInt("server.port"),
 	}
 
 	config := &Config{
-		Verbose: true,
+		General: general,
 		DB:      db,
 		Server:  server,
 	}

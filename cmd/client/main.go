@@ -22,7 +22,7 @@ var (
 )
 
 func main() {
-	config, err := pkg.ParseConfig()
+	config, err := pkg.ParseConfig("./configs/config.toml")
 	if err != nil {
 		fmt.Println("config file parse error.")
 		fmt.Println(err)

@@ -1,11 +1,17 @@
-Verbose = true
+[general]
+    verbose = true
 
-server_address = 'localhost'
-server_port = 8080
+[server]
+    address = 'localhost'
+    port = 8080
 
-db_driver =   "mysql"
-db_user =     "user"
-db_password = "password"
-db_database = "mission_reward"
-db_address  = "localhost"
-db_port = 3306
+[db]
+    driver =   "mysql"
+    user =     "user"
+    password = "password"
+    database = "mission_reward"
+    address  = "localhost"
+    port = 3306
+
+[test]
+    db_port = 3307

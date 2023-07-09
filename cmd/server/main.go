@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/hideA88/mission-reward/cmd"
@@ -24,14 +25,17 @@ import (
 )
 
 func main() {
-	config, err := pkg.ParseConfig()
+	confPath := flag.String("f", "./configs/config.toml", "config file path")
+	flag.Parse()
+
+	config, err := pkg.ParseConfig(*confPath)
 	if err != nil {
 		fmt.Println("config file parse error.")
 		fmt.Println(err)
 		return
 	}
 
-	logger := pkg.NewLogger(config.Verbose)
+	logger := pkg.NewLogger(config.General.Verbose)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
