@@ -1,18 +1,19 @@
 export PATH := $(CURDIR)/.bin:$(PATH)
 
-TARGETS = mission-reward-server
+TARGETS := mission-reward-server
 
 GOLANGCI_LINT = golangci-lint run
 TEST = ./...
 PKGNAME = $(shell go list -m)
 GIT_COMMIT = $(shell git rev-parse HEAD)
 VERSION =$(shell git symbolic-ref -q --short HEAD || git describe --tags --exact-match)
-BUILD=local
+BUILD:=local
 LDFLAGS = -ldflags "-X $(PKGNAME)/pkg/version.gitCommit=$(GIT_COMMIT) \
 										-X $(PKGNAME)/pkg/version.version=$(VERSION)\
 										-X $(PKGNAME)/pkg/version.build=$(BUILD)"
 DB_ADDRESS := localhost
 GOOSE_OPTION = -dir ./db/migrate mysql "user:password@tcp(${DB_ADDRESS}:3306)/mission_reward?parseTime=true&loc=Asia%2FTokyo"
+GOOSE_OPTION_TEST_DB = -dir ./db/migrate mysql "user:password@tcp(${DB_ADDRESS}:3307)/mission_reward?parseTime=true&loc=Asia%2FTokyo"
 
 # command
 defualt: tools help
@@ -85,9 +86,14 @@ protoc:
 migrate-help:
 	goose -h $(GOOSE_OPTION)
 
+## Run migrate testdb
+migrate-testdb-%:
+	goose $(GOOSE_OPTION_TEST_DB) ${@:migrate-testdb-%=%}
+
 ## Run migrate
 migrate-%:
-	goose  $(GOOSE_OPTION) ${@:migrate-%=%}
+	goose $(GOOSE_OPTION) ${@:migrate-%=%}
+
 
 ## ssh service container
 ssh-server:

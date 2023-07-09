@@ -24,6 +24,20 @@ services:
       TZ: "Asia/Tokyo"
     volumes:
       - ./docker/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./docker/data/mysql:/var/lib/mysql
+      - ./docker/data/db/mysql:/var/lib/mysql
     ports:
       - "3306:3306"
+  testdb:
+    image: mysql:8.0
+    container_name: testdb
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mission_reward
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      TZ: "Asia/Tokyo"
+    volumes:
+      - ./docker/conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/data/testdb/mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
