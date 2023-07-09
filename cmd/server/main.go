@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/hideA88/mission-reward/cmd"
+	"github.com/hideA88/mission-reward/pkg"
 	crepo "github.com/hideA88/mission-reward/pkg/command/repository"
 	cserv "github.com/hideA88/mission-reward/pkg/command/service"
 	"github.com/hideA88/mission-reward/pkg/consumer/model/message"
@@ -23,14 +24,14 @@ import (
 )
 
 func main() {
-	config, err := cmd.ParseConfig()
+	config, err := pkg.ParseConfig()
 	if err != nil {
 		fmt.Println("config file parse error.")
 		fmt.Println(err)
 		return
 	}
 
-	logger := cmd.NewLogger(config.Verbose)
+	logger := pkg.NewLogger(config.Verbose)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 

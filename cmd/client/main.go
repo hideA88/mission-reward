@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hideA88/mission-reward/cmd"
+	"github.com/hideA88/mission-reward/pkg"
 	pb "github.com/hideA88/mission-reward/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -22,7 +22,7 @@ var (
 )
 
 func main() {
-	config, err := cmd.ParseConfig()
+	config, err := pkg.ParseConfig()
 	if err != nil {
 		fmt.Println("config file parse error.")
 		fmt.Println(err)
