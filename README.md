@@ -22,6 +22,7 @@ make migrate-up
 1. サーバーの起動をします
 
 ```
+make deps
 docker-compose up -d
 ```
 
@@ -31,6 +32,12 @@ docker-compose up -d
 
 ```
 make run-client
+```
+
+#### テストの実行
+
+```
+make test
 ```
 
 ## 残課題
