@@ -12,10 +12,12 @@ require (
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.56.1
 	google.golang.org/protobuf v1.31.0
+	gotest.tools/v3 v3.5.0
 )
 
 require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
