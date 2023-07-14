@@ -8,6 +8,7 @@ import (
 	"github.com/hideA88/mission-reward/pkg/consumer/repository"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
+	"sync"
 	"time"
 )
 
@@ -127,5 +128,33 @@ func (msc *CommonMissionChecker) receivedAchieve(eventAt *time.Time, ah *reward.
 		return false, nil
 	} else {
 		return true, nil
+	}
+}
+
+//TODO implement 本当はMessage型とかの制約をつけたい
+
+type Checker[T any] interface {
+	Init(ctx context.Context) error
+	CheckMission(ctx context.Context, data *T) error
+}
+
+func ServeChecker[T any](ctx context.Context, wCh <-chan *T, checker Checker[T], gStopCh <-chan struct{}, wg *sync.WaitGroup) {
+	wg.Add(1)
+	checker.Init(ctx)
+	for {
+		select {
+		case wd := <-wCh:
+			checker.CheckMission(ctx, wd)
+			break
+		case _ = <-gStopCh:
+			//TODO implement openMissionをしてさらにループするケースがあるので、永続化して次回起動時にキューにつめるなどをしたほうがよさそう
+			l := len(wCh)
+			if l > 0 {
+				wd := <-wCh
+				checker.CheckMission(ctx, wd)
+			}
+			wg.Done()
+			return
+		}
 	}
 }
