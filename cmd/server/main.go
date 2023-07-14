@@ -20,6 +20,8 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"sync"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -36,7 +38,11 @@ func main() {
 	}
 
 	logger := pkg.NewLogger(config.General.Verbose)
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+
+	cCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ctx, stop := signal.NotifyContext(cCtx, os.Interrupt)
 	defer stop()
 
 	port := config.Server.Port
@@ -64,6 +70,8 @@ func main() {
 		logger.Fatal("db connection error: ", err)
 		defer db.Close()
 	}
+	gStopCh := make(chan struct{}) //graceful shutdownを通知するチャンネル
+	var wg sync.WaitGroup
 
 	lgCh := make(chan *message.Login)
 	kmCh := make(chan *message.KillMonster)
@@ -93,20 +101,13 @@ func main() {
 	ur := repository.NewUserRepository(db, logger)
 
 	mc := checker.NewCommonMission(mr, rr, ur, gcCh, giCh, omCh, logger)
-	tc := checker.NewTotalCoin(mc)
-	gc := checker.NewGetItem(mc)
-	oc := checker.NewOpenMission(mc, lgCh, kmCh, luCh)
 
-	lm := checker.NewLoginMission(mc)
-	lu := checker.NewLevelUpMission(mc)
-	km := checker.NewKillMonsterMission(mc)
-
-	go lm.Serve(ctx, lgCh)
-	go lu.Serve(ctx, luCh)
-	go km.Serve(ctx, kmCh)
-	go tc.Serve(ctx, gcCh)
-	go gc.Serve(ctx, giCh)
-	go oc.Serve(ctx, omCh)
+	go checker.ServeChecker[message.Login](ctx, lgCh, checker.NewLoginMission(mc), gStopCh, &wg)
+	go checker.ServeChecker[message.LevelUp](ctx, luCh, checker.NewLevelUpMission(mc), gStopCh, &wg)
+	go checker.ServeChecker[message.KillMonster](ctx, kmCh, checker.NewKillMonsterMission(mc), gStopCh, &wg)
+	go checker.ServeChecker[message.GetCoin](ctx, gcCh, checker.NewTotalCoin(mc), gStopCh, &wg)
+	go checker.ServeChecker[message.GetItem](ctx, giCh, checker.NewGetItem(mc), gStopCh, &wg)
+	go checker.ServeChecker[message.OpenMission](ctx, omCh, checker.NewOpenMission(mc, lgCh, kmCh, luCh), gStopCh, &wg)
 
 	go func() {
 		logger.Infof("start gRPC service port: %v", port)
@@ -118,13 +119,13 @@ func main() {
 	}()
 
 	<-ctx.Done()
-	logger.Infof("stopping service...")
 
-	_, cancel := context.WithCancel(ctx)
+	_, cancel = context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
-	//TODO implement service以下で作成しているゴルーチンを停止
-
+	logger.Infof("stopping service...")
+	close(gStopCh)
 	gsrv.GracefulStop()
+	wg.Wait()
 
 	logger.Infof("stopping service... done")
 }
