@@ -25,18 +25,15 @@ func NewOpenMission(mc *CommonMissionChecker,
 	}
 }
 
-func (oc *OpenMissionChecker) Serve(ctx context.Context, omCh <-chan *message.OpenMission) {
-	for omEvent := range omCh {
-		oc.logger.Info("receive meesage: ", omEvent)
-		oc.handleEvent(ctx, omEvent)
-	}
+func (oc *OpenMissionChecker) Init(ctx context.Context) error {
+	return nil
 }
 
-func (oc *OpenMissionChecker) handleEvent(ctx context.Context, omEvent *message.OpenMission) {
+func (oc *OpenMissionChecker) CheckMission(ctx context.Context, omEvent *message.OpenMission) error {
 	m, err := oc.mr.GetMission(omEvent.MissionId)
 	if err != nil {
 		oc.logger.Error(err)
-		return
+		return err
 	}
 
 	switch mission.Type(m.MissionType) {
@@ -66,4 +63,5 @@ func (oc *OpenMissionChecker) handleEvent(ctx context.Context, omEvent *message.
 			EventAt: omEvent.EventAt,
 		}
 	}
+	return nil
 }

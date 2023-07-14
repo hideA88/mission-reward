@@ -17,16 +17,15 @@ func NewLoginMission(mc *CommonMissionChecker) *LoginMissionChecker {
 	}
 }
 
-func (lmc *LoginMissionChecker) Serve(ctx context.Context, lgCh <-chan *message.Login) {
-	for lgm := range lgCh {
-		fn, err := lmc._checkMission(lgm.UserId)
-		if err != nil {
-			//TODO implement handle error
-			lmc.logger.Error("error occuerd:", err)
-			continue
-		}
-		lmc.checkMission(ctx, lgm.UserId, lgm.EventAt, mission.LOGIN, fn)
+func (lmc *LoginMissionChecker) CheckMission(ctx context.Context, lgm *message.Login) error {
+	fn, err := lmc._checkMission(lgm.UserId)
+	if err != nil {
+		//TODO implement handle error
+		lmc.logger.Error("error occuerd:", err)
+		return err
 	}
+	lmc.checkMission(ctx, lgm.UserId, lgm.EventAt, mission.LOGIN, fn)
+	return nil
 }
 
 func (lmc *LoginMissionChecker) _checkMission(userId int64) (func(*reward.MissionWithAchieveHistory) (bool, error), error) {
@@ -39,4 +38,8 @@ func (lmc *LoginMissionChecker) _checkMission(userId int64) (func(*reward.Missio
 		r, err := lmc.receivedAchieve(lastLogin.EventAt, uh)
 		return !r, err
 	}, nil
+}
+
+func (lmc *LoginMissionChecker) Init(ctx context.Context) error {
+	return nil
 }

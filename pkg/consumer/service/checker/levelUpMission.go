@@ -15,9 +15,11 @@ func NewLevelUpMission(mc *CommonMissionChecker) *LevelUpMissionChecker {
 	}
 }
 
-func (luc *LevelUpMissionChecker) Serve(ctx context.Context, luCh <-chan *message.LevelUp) {
-	for lum := range luCh {
-		//TODO implement
-		luc.logger.Info("receive level up message:", lum)
-	}
+func (luc *LevelUpMissionChecker) Init(ctx context.Context) error {
+	return nil
+}
+
+func (luc *LevelUpMissionChecker) CheckMission(ctx context.Context, lum *message.LevelUp) error {
+	luc.logger.Info("receive level up message:", lum)
+	return nil
 }

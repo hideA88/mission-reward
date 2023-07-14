@@ -9,30 +9,36 @@ import (
 
 type TotalCoinChecker struct {
 	*CommonMissionChecker
+	missions []*mission.TotalCoinMission
 }
 
 func NewTotalCoin(mc *CommonMissionChecker) *TotalCoinChecker {
 	return &TotalCoinChecker{
 		mc,
+		nil,
 	}
 }
 
-func (tcc *TotalCoinChecker) Serve(ctx context.Context, gcCh <-chan *message.GetCoin) {
+func (tcc *TotalCoinChecker) Init(ctx context.Context) error {
 	missions, err := tcc.mr.SelectTotalCoinMissions()
 	if err != nil {
 		tcc.logger.Error("select total coin missions error:", err)
-		return
+		return err
 	}
+	tcc.missions = missions
 
-	for gcm := range gcCh {
-		fn, err := tcc._checkMission(gcm.UserId, missions)
-		if err != nil {
-			//TODO implement handle error
-			tcc.logger.Error("error occuerd:", err)
-			continue
-		}
-		tcc.checkMission(ctx, gcm.UserId, gcm.EventAt, mission.TOTAL_COIN, fn)
+	return nil
+}
+
+func (tcc *TotalCoinChecker) CheckMission(ctx context.Context, gcm *message.GetCoin) error {
+	fn, err := tcc._checkMission(gcm.UserId, tcc.missions)
+	if err != nil {
+		//TODO implement handle error
+		tcc.logger.Error("error occuerd:", err)
+		return err
 	}
+	tcc.checkMission(ctx, gcm.UserId, gcm.EventAt, mission.TOTAL_COIN, fn)
+	return nil
 }
 
 func (tcc *TotalCoinChecker) _checkMission(userId int64, missions []*mission.TotalCoinMission) (func(*reward.MissionWithAchieveHistory) (bool, error), error) {

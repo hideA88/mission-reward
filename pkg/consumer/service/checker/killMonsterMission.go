@@ -15,9 +15,11 @@ func NewKillMonsterMission(mc *CommonMissionChecker) *KillMonsterMissionChecker 
 	}
 }
 
-func (kmc *KillMonsterMissionChecker) Serve(ctx context.Context, kmCh <-chan *message.KillMonster) {
-	for kms := range kmCh {
-		//TODO implement
-		kmc.logger.Info("receive kill monster message:", kms)
-	}
+func (kmc *KillMonsterMissionChecker) Init(ctx context.Context) error {
+	return nil
+}
+
+func (kmc *KillMonsterMissionChecker) CheckMission(ctx context.Context, kms *message.KillMonster) error {
+	kmc.logger.Info("receive kill monster message:", kms)
+	return nil
 }
